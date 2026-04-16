@@ -12,7 +12,7 @@ from telegram.ext import Application, CommandHandler, ContextTypes
 # ------------------------------------------------------------
 
 # Token para pruebas (REEMPLAZA con tu token real)
-BOT_TOKEN = "TU_TOKEN_AQUI"
+BOT_TOKEN = "8703222853:AAHBgU_2izFJyd3QV6O7QFSi6P8p7tMQtZY"
 
 # Para producción en Render, usa variables de entorno:
 # BOT_TOKEN = os.getenv("BOT_TOKEN")
