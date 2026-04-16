@@ -17,6 +17,7 @@ BOT_TOKEN = "8703222853:AAHBgU_2izFJyd3QV6O7QFSi6P8p7tMQtZY"
 # Para producción en Render, usa variables de entorno:
 # BOT_TOKEN = os.getenv("BOT_TOKEN")
 PORT = int(os.getenv("PORT", 8080))
+WEBHOOK_URL = os.getenv("WEBHOOK_URL", None)  # Ej: https://tu-app.onrender.com
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -163,17 +164,37 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # MAIN
 # ------------------------------------------------------------
 
+async def post_init(application: Application):
+    """Configurar webhook al iniciar (para modo webhook en Render)"""
+    if WEBHOOK_URL:
+        await application.bot.set_webhook(f"{WEBHOOK_URL}/telegram/{BOT_TOKEN}")
+        logger.info(f"Webhook configurado: {WEBHOOK_URL}/telegram/{BOT_TOKEN}")
+    else:
+        await application.bot.delete_webhook()
+        logger.info("Modo polling activado (webhook eliminado)")
+
+
 def main():
     app = Application.builder() \
         .token(BOT_TOKEN) \
+        .post_init(post_init) \
         .build()
 
     app.add_handler(CommandHandler("start", start))
 
     logger.info("Bot corriendo...")
     
-    # Modo polling (funciona en Render con workers gratuitos)
-    app.run_polling(drop_pending_updates=True)
+    if WEBHOOK_URL:
+        # Modo webhook para producción en Render
+        app.run_webhook(
+            listen="0.0.0.0",
+            port=PORT,
+            url_path=f"telegram/{BOT_TOKEN}",
+            webhook_url=f"{WEBHOOK_URL}/telegram/{BOT_TOKEN}"
+        )
+    else:
+        # Modo polling (funciona en Render con workers gratuitos)
+        app.run_polling(drop_pending_updates=True)
 
 
 if __name__ == "__main__":
