@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 
 # ----------------------------------------------------------------------
 # Constantes y configuración
-TOKEN = os.environ.get("8703222853:AAHBgU_2izFJyd3QV6O7QFSi6P8p7tMQtZY")
+TOKEN = "8703222853:AAHBgU_2izFJyd3QV6O7QFSi6P8p7tMQtZY"
 if not TOKEN:
     raise ValueError("No se encontró la variable de entorno TELEGRAM_TOKEN")
 
