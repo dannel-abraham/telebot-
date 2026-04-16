@@ -2,16 +2,21 @@ import asyncio
 import random
 import logging
 import aiohttp
+import os
 
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
-from telegram.request import HTTPXRequest
 
 # ------------------------------------------------------------
 # CONFIG
 # ------------------------------------------------------------
 
-BOT_TOKEN = "8703222853:AAHBgU_2izFJyd3QV6O7QFSi6P8p7tMQtZY"
+# Token para pruebas (REEMPLAZA con tu token real)
+BOT_TOKEN = "TU_TOKEN_AQUI"
+
+# Para producción en Render, usa variables de entorno:
+# BOT_TOKEN = os.getenv("BOT_TOKEN")
+PORT = int(os.getenv("PORT", 8080))
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -159,16 +164,15 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # ------------------------------------------------------------
 
 def main():
-    request = HTTPXRequest(connect_timeout=10, read_timeout=10)
-
     app = Application.builder() \
         .token(BOT_TOKEN) \
-        .request(request) \
         .build()
 
     app.add_handler(CommandHandler("start", start))
 
     logger.info("Bot corriendo...")
+    
+    # Modo polling (funciona en Render con workers gratuitos)
     app.run_polling(drop_pending_updates=True)
 
 
