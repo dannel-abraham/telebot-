@@ -174,7 +174,7 @@ async def post_init(application: Application):
         logger.info("Modo polling activado (webhook eliminado)")
 
 
-def main():
+async def main():
     app = Application.builder() \
         .token(BOT_TOKEN) \
         .post_init(post_init) \
@@ -186,7 +186,7 @@ def main():
     
     if WEBHOOK_URL:
         # Modo webhook para producción en Render
-        app.run_webhook(
+        await app.run_webhook(
             listen="0.0.0.0",
             port=PORT,
             url_path=f"telegram/{BOT_TOKEN}",
@@ -194,8 +194,8 @@ def main():
         )
     else:
         # Modo polling (funciona en Render con workers gratuitos)
-        app.run_polling(drop_pending_updates=True)
+        await app.run_polling(drop_pending_updates=True)
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
