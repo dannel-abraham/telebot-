@@ -47,7 +47,7 @@ async def get_weather(city: str, session: aiohttp.ClientSession) -> str:
         w = data["current_weather"]
         temp = w["temperature"]
         desc = WMO_CODES.get(w["weathercode"], "🌍 Variable")
-                return f"📍 *{loc['name']}, {loc.get('country', '')}*\n🌡 {temp}°C → {desc}"
+        return f"📍 *{loc['name']}, {loc.get('country', '')}*\n🌡 {temp}°C → {desc}"
     except Exception as e:
         logger.error(f"Clima: {e}")
         return "⚠️ Error obteniendo el clima."
