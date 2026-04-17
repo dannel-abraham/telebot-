@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 # 🔐 Variables de entorno
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")  # Para broadcasts automáticos
-WEATHER_CITY = "Havana" # Ciudad por defecto
+WEATHER_CITY = "Havana"  # Ciudad por defecto
 
 # 🌍 Códigos WMO para clima
 WMO_CODES = {
@@ -113,7 +113,8 @@ async def process_commands(bot: Bot, session: aiohttp.ClientSession):
                 continue  # Ignorar mensajes no reconocidos
             
             await bot.send_message(chat_id=chat_id, text=response, parse_mode=ParseMode.MARKDOWN)
-            await bot.delete_message(chat_id=chat_id, message_id=update.update_id + 1) if update.update_id else None
+            # Opcional: eliminar mensaje del usuario (puede fallar si no existe)
+            # await bot.delete_message(chat_id=chat_id, message_id=update.update_id + 1)
             logger.info(f"Comando procesado: {text} → chat {chat_id}")
             
     except Exception as e:
