@@ -1,30 +1,30 @@
-name: Telegram Bot
+name: Telegram Bot Híbrido
 
 on:
   schedule:
-    - cron: "*/5 * * * *"  # cada 5 minutos
-  workflow_dispatch:
+    - cron: "0 8,20 * * *"        # Broadcasts: 8 AM y 8 PM UTC
+    - cron: "*/10 * * * *"        # Polling de comandos cada 10 min
+  workflow_dispatch:             # Ejecución manual para pruebas
 
 jobs:
   run-bot:
     runs-on: ubuntu-latest
+    timeout-minutes: 5           # Free tier: máximo 5 min por job
 
     steps:
-      - name: Checkout
+      - name: 📦 Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Python
+      - name: 🐍 Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: "3.11"
 
-      - name: Install dependencies
+      - name: 📥 Instalar dependencias
         run: pip install -r requirements.txt
 
-      - name: Run bot
+      - name: 🚀 Ejecutar bot
         env:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-          CHAT_ID: ${{ secrets.CHAT_ID }}
-          FREENEWS_API_KEY: ${{ secrets.FREENEWS_API_KEY }}
-          CURRENTS_API_KEY: ${{ secrets.CURRENTS_API_KEY }}
+          CHAT_ID: ${{ secrets.CHAT_ID }}      # Para broadcast
         run: python telebot.py
