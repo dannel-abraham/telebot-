@@ -20,46 +20,59 @@ bot = Bot(token=BOT_TOKEN)
 # ---------------------------
 
 async def get_freenews():
-    url = f"https://freenewsapi.io/api/v1/news?apikey={FREENEWS_API_KEY}&country=us,cu,mx&lang=es,en"
+    countries = ["us", "mx"]  # evitar múltiples países
+    country = random.choice(countries)
+
+    url = f"https://freenewsapi.io/api/v1/news?apikey={FREENEWS_API_KEY}&country={country}&lang=es,en"
+
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as r:
             data = await r.json()
-            if "data" in data and data["data"]:
-                n = random.choice(data["data"])
-                return f"📰 FreeNews\n{n.get('title','Sin título')}\n{n.get('url','')}"
+
+            news_list = data.get("data", [])
+            if news_list:
+                n = random.choice(news_list)
+                return f"📰 FreeNews ({country.upper()})\n{n.get('title','Sin título')}\n{n.get('url','')}"
     return None
 
 
 async def get_currents():
     url = f"https://api.currentsapi.services/v1/latest-news?apiKey={CURRENTS_API_KEY}&language=es,en"
+
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as r:
             data = await r.json()
-            if "news" in data and data["news"]:
-                n = random.choice(data["news"])
+
+            news_list = data.get("news", [])
+            if news_list:
+                n = random.choice(news_list)
                 return f"🌎 Currents\n{n.get('title','Sin título')}\n{n.get('url','')}"
     return None
 
 
 async def get_pynews():
     url = "https://pynews.pythonanywhere.com/api/news"
+
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as r:
             data = await r.json()
-            if "news" in data and data["news"]:
-                n = random.choice(data["news"])
+
+            news_list = data.get("news", [])
+            if news_list:
+                n = random.choice(news_list)
                 return f"⚡ PyNews\n{n.get('title','Sin título')}"
     return None
 
 
 async def get_weather():
-    # Habana, Cuba
     url = "https://api.open-meteo.com/v1/forecast?latitude=23.11&longitude=-82.36&current_weather=true"
+
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as r:
             data = await r.json()
-            if "current_weather" in data:
-                w = data["current_weather"]
+
+            w = data.get("current_weather")
+            if w:
                 return (
                     "🌦️ Clima en La Habana\n"
                     f"Temperatura: {w.get('temperature')}°C\n"
@@ -69,7 +82,7 @@ async def get_weather():
 
 
 # ---------------------------
-# ROTADOR DE APIs
+# ROTACIÓN
 # ---------------------------
 
 API_FUNCTIONS = [
@@ -84,17 +97,23 @@ last_index = -1
 
 async def get_next_data():
     global last_index
+
     last_index = (last_index + 1) % len(API_FUNCTIONS)
     func = API_FUNCTIONS[last_index]
 
     try:
+        print(f"🔄 Usando API: {func.__name__}")
         result = await func()
+
         if result:
             return result
-    except Exception as e:
-        print("Error:", e)
 
-    return "⚠️ No se pudo obtener información en este ciclo."
+        print(f"⚠️ {func.__name__} devolvió None")
+
+    except Exception as e:
+        print(f"❌ Error en {func.__name__}: {e}")
+
+    return None
 
 
 # ---------------------------
@@ -102,13 +121,20 @@ async def get_next_data():
 # ---------------------------
 
 async def main():
-    print("Bot corriendo...")
+    print("🚀 Bot iniciado...")
+
     while True:
+        msg = await get_next_data()
+
+        # fallback si todo falla
+        if not msg:
+            msg = "⚠️ No hay datos disponibles ahora mismo. Intentando en breve..."
+
         try:
-            msg = await get_next_data()
             await bot.send_message(chat_id=CHAT_ID, text=msg)
+            print("✅ Mensaje enviado")
         except Exception as e:
-            print("Error enviando mensaje:", e)
+            print(f"❌ Error enviando mensaje: {e}")
 
         await asyncio.sleep(300)  # 5 minutos
 
