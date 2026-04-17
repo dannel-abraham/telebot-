@@ -96,7 +96,8 @@ async def process_commands(bot: Bot, session: aiohttp.ClientSession):
             elif text.startswith("/consejo"):
                 response = await get_advice(session)
             elif text.startswith("/edad"):
-                name = text.replace("/edad", "").strip()                if not name:
+                name = text.replace("/edad", "").strip()
+                if not name:
                     response = "Uso: /edad [nombre]"
                 else:
                     response = await get_age(name, session)
